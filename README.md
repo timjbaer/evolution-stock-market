@@ -10,8 +10,11 @@ Developed for CS @ ILLINOIS Sail in April 2019. Students will learn about and ap
     python3 -m pip install --upgrade pip  
     python3 -m pip install jupyter
     ```
-
 * Requests
     ```
     pip install requests
+    ```
+* Numpy
+    ```
+	pip install numpy
     ```
