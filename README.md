@@ -8,7 +8,6 @@ Data provided for free by [IEX](https://iextrading.com/developer/). View [IEX’
 * Python 3.7.0 (PIP should be installed along with it) 
 * Jupyter Notebook
     ```
-    python3 -m pip install --upgrade pip  
     python3 -m pip install jupyter
     ```
 * Requests
