@@ -6,7 +6,7 @@ import requests
 import random
 import numpy as np
 
-TOKEN = "pk_8d57e606cabc41aaaacc71dd142e8120" # edit if using your own IEX account
+TOKEN = "pk_2834cb48ae0144a0a4ae1d23717770d8" # edit if using your own IEX account
 SYMBOLS = """abde,amd,googl,goog,adi,aapl,amat,asml,adsk,bidu,
     avgo,cdns,cern,chkp,csco,ctxs,fb,intc,intu,klac,
     lrcx,mxim,mchp,mu,msft,ntap,ntes,nvda,nxpi,qcom,
@@ -22,8 +22,8 @@ dict = r.json()
 NUM_DAYS = 50 # a little less than 3 months
 NUM_TRAINING_DAYS = 40
 
-training_data = np.array([0, 0, 0, 0, 0, 0]) # python is weird
-testing_data = np.array([0, 0, 0, 0, 0, 0])
+training_data = np.array([0, 0, 0, 0, 0]) # python is weird
+testing_data = np.array([0, 0, 0, 0, 0])
     
 for symbol in dict:
     for i in range(NUM_DAYS):
@@ -35,9 +35,9 @@ for symbol in dict:
         predicted_price = dict[symbol]["chart"][i + 7]["open"]
 
         if i < NUM_TRAINING_DAYS:
-            training_data = np.vstack([training_data, [openPrice, high, low, close, volume, predicted_price]])
+            training_data = np.vstack([training_data, [openPrice, high, low, close, predicted_price]])
         else:
-            testing_data = np.vstack([training_data, [openPrice, high, low, close, volume, predicted_price]])
+            testing_data = np.vstack([training_data, [openPrice, high, low, close, predicted_price]])
 
     
 training_data = training_data[1::]
@@ -65,9 +65,11 @@ class Genetic_Algorithm:
     # Find fitness for selection
     def get_fitness_one(self,calculated_out, real_out):
         reciporocal_reals = 1. / real_out
+        reciporocal_out = 1. / calculated_out
         averaging_factor = 1. / self.NUM_EXAMPLES
         fitness_array = np.absolute(1 - (averaging_factor * np.matmul(calculated_out, reciporocal_reals)))
-        return fitness_array
+        fitness_array_two = np.absolute(1 - (averaging_factor * np.matmul(reciporocal_out, real_out)))
+        return np.sqrt((fitness_array * fitness_array_two))
     def get_fitness_two(self,calculated_out,real_out): #DO NOT USE THIS FUNCTION EVER
         check_out = real_out
         fitness_array = np.zeros(len(calculated_out),dtype=np.dtype('f'))
@@ -110,13 +112,13 @@ class Genetic_Algorithm:
                         pop[index,point] -= 0.0001
         return pop
 
-factor = 1
+factorArr = 1
 num = 0
 modelList = []
 fitnessList = []
 factorList = []
 while(num < 50):
-    pop = abs(np.random.randn(100, training_data.shape[1] - 1).astype('f'))*factor #initialize random population
+    pop = abs(np.random.randn(100, training_data.shape[1] - 1).astype('f'))*factorArr #initialize random population
     ga = Genetic_Algorithm(training_data, DNA_SIZE = training_data.shape[1] - 1)
     mostFit = 0
     for i in range(0,ga.N_GENERATIONS):
@@ -137,9 +139,9 @@ while(num < 50):
     calculated_results = testGa.translateDNA(mostFit)
     fitness = testGa.get_fitness_one(calculated_results,testGa.output_data)
     fitnessList.append(fitness[0])
-    factorList.append(factor)
+    factorList.append(factorArr)
     print(fitness)
-    factor = (sum(mostFit) / len(mostFit))
+    factorArr = mostFit
     num += 1
 print()
 print()
@@ -150,3 +152,30 @@ best_model = modelList[arg]
 print("Smallest Fitness value:",smallest_val)
 print("Final Factor Value:",best_factor)
 print("Best Model:",best_model)
+
+
+
+
+SYMBOLS = "aapl"
+SYMBOLS_UPPER="AAPL"
+RANGE = "1d"
+
+
+
+query = {"token": TOKEN, "symbols": SYMBOLS, "types": TYPES, "range": RANGE}
+
+r = requests.get("https://cloud.iexapis.com/beta/stock/market/batch", params=query)
+
+
+
+realtime = r.json()
+#print(realtime)
+
+
+aapl_realtime = np.array([realtime[SYMBOLS_UPPER]["chart"][0]["average"], realtime[SYMBOLS_UPPER]["chart"][0]["high"], realtime[SYMBOLS_UPPER]["chart"][0]["low"], realtime[SYMBOLS_UPPER]["chart"][0]["average"]], dtype=np.dtype('f'))
+
+predicted_price = np.matmul(best_model,np.transpose(aapl_realtime))
+
+
+
+print("aapl price 7 days from now:", predicted_price)
