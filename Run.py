@@ -6,7 +6,7 @@ import requests
 import random
 import numpy as np
 
-TOKEN = "pk_2834cb48ae0144a0a4ae1d23717770d8" # edit if using your own IEX account
+TOKEN = "pk_84f5698fa6df4e67a97286c9e6991913" # edit if using your own IEX account
 SYMBOLS = """abde,amd,googl,goog,adi,aapl,amat,asml,adsk,bidu,
     avgo,cdns,cern,chkp,csco,ctxs,fb,intc,intu,klac,
     lrcx,mxim,mchp,mu,msft,ntap,ntes,nvda,nxpi,qcom,
@@ -172,7 +172,7 @@ realtime = r.json()
 #print(realtime)
 
 
-aapl_realtime = np.array([realtime[SYMBOLS_UPPER]["chart"][0]["average"], realtime[SYMBOLS_UPPER]["chart"][0]["high"], realtime[SYMBOLS_UPPER]["chart"][0]["low"], realtime[SYMBOLS_UPPER]["chart"][0]["average"]], dtype=np.dtype('f'))
+aapl_realtime = np.array([realtime[SYMBOLS_UPPER]["chart"][0]["average"], realtime[SYMBOLS_UPPER]["chart"][0]["high"], realtime[SYMBOLS_UPPER]["chart"][0]["low"], realtime[SYMBOLS_UPPER]["chart"][len(realtime[SYMBOLS_UPPER]["chart"]) - 1]["average"]], dtype=np.dtype('f'))
 
 predicted_price = np.matmul(best_model,np.transpose(aapl_realtime))
 
